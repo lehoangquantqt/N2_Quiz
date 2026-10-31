@@ -1,5 +1,5 @@
-const exam = window.JLPT_EXAMS.find((exam) => exam.id === "N2_T12_2025");
-const questions = [
+const exam_12_2025 = window.JLPT_EXAMS.find((exam) => exam.id === "N2_T12_2025");
+const Qlistening_12_2025 = [
   {
     id: 1,
     c: "問題１",
@@ -326,13 +326,13 @@ const questions = [
     om: ["Xe đạp số 1", "Xe đạp số 2", "Xe đạp số 3", "Xe đạp số 4"],
   },
 ];
-const newList = list.map((item) => ({
+const newList = Qlistening_12_2025.map((item) => ({
   ...item,
   a: item.a - 1,
 }));
 
-if (exam) {
-  exam.listening = {
+if (exam_12_2025) {
+  exam_12_2025.listening = {
     audio: {
       src: "audio/n2-t12-2025/listening.mp3",
     },

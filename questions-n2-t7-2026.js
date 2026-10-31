@@ -15,8 +15,8 @@ const passage48_51 = `以下は、雑誌のコラムである。
   `;
 
 window.JLPT_EXAMS.push({
-  id: "N2_T12_2025",
-  title: "JLPT N2 - Thang 12/2025",
+  id: "N2_T7_2026",
+  title: "JLPT N2 - Thang 7/2026",
   questions: [
     {
       id: 1,
