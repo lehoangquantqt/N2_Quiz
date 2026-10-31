@@ -1,0 +1,14 @@
+<div class="feedback show ${ok ? " good" : "bad" }"><strong>${ok ? "Chính xác!" : "Chưa chính xác."} Đáp án: ${q.a + 1}.
+        ${q.o[q.a]}</strong>
+    <div>${q.e || ""}</div>
+    ${
+    q.om?.length > 0
+    ? `
+    <hr><b>📚 Nghĩa các lựa chọn</b>
+    <div class="meanings">${q.o.map((v, i) => `<div class="meaning ${i === q.a ? " correct-meaning" : "" }"><b>${i + 1}.
+            ${v} ${i === q.a ? "✓ Đáp án đúng" : ""}</b>
+        <div>${q.om?.[i] || "Chưa có nghĩa tiếng Việt."}</div>
+        </div>`).join("")}
+    </div>`:``
+    }
+</div>

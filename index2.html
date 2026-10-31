@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>JLPT Practice Quiz</title>
+    <style>
+      :root {
+        --bg: #f4f6fb;
+        --card: #fff;
+        --ink: #172033;
+        --muted: #68738a;
+        --line: #e3e8f1;
+        --accent: #3457d5;
+        --good: #16834a;
+        --bad: #c43d4b;
+        --soft: #edf1ff;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font:
+          16px/1.65 system-ui,
+          -apple-system,
+          "Noto Sans JP",
+          sans-serif;
+      }
+      .wrap {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 24px 16px 60px;
+      }
+      .hero {
+        padding: 24px;
+        border-radius: 18px;
+        background: linear-gradient(130deg, #172b59, #496bd8);
+        color: white;
+        margin-bottom: 18px;
+      }
+      .hero h1 {
+        margin: 0 0 6px;
+        font-size: clamp(23px, 4vw, 32px);
+      }
+      .hero p {
+        margin: 0;
+        color: #e2e8ff;
+      }
+      .toolbar,
+      .panel,
+      .question {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 18px;
+        margin: 14px 0;
+        box-shadow: 0 4px 18px #1d2c4a0a;
+      }
+      .toolbar {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .toolbar label {
+        font-size: 14px;
+        color: var(--muted);
+      }
+      select,
+      button {
+        font: inherit;
+        border-radius: 10px;
+        padding: 10px 14px;
+        border: 1px solid var(--line);
+        background: white;
+        color: var(--ink);
+      }
+      button {
+        cursor: pointer;
+        font-weight: 650;
+      }
+      button.primary {
+        background: var(--accent);
+        color: #fff;
+        border-color: var(--accent);
+      }
+      button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+      .stats {
+        margin-left: auto;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .progress {
+        height: 8px;
+        background: #e8ecf5;
+        border-radius: 20px;
+        overflow: hidden;
+        margin-top: 10px;
+      }
+      .bar {
+        height: 100%;
+        width: 0;
+        background: var(--accent);
+        transition: width 0.2s;
+      }
+      .meta {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .tag {
+        background: var(--soft);
+        color: #344caa;
+        padding: 3px 9px;
+        border-radius: 99px;
+        font-weight: 650;
+      }
+      .passage {
+        background: #f8f9fd;
+        border: 1px solid var(--line);
+        border-left: 4px solid var(--accent);
+        border-radius: 12px;
+        padding: 16px 18px;
+        margin: 14px 0 18px;
+        white-space: pre-line;
+        line-height: 1.95;
+      }
+      .passage-title {
+        font-weight: 750;
+        margin-bottom: 8px;
+        color: var(--accent);
+      }
+      .question h2 {
+        font-size: 20px;
+        line-height: 1.55;
+        margin: 12px 0 18px;
+      }
+      .num {
+        font-size: 13px;
+        color: var(--muted);
+        font-weight: 700;
+      }
+      .choices {
+        display: grid;
+        gap: 10px;
+      }
+      .choice {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        text-align: left;
+        width: 100%;
+        padding: 13px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #fff;
+      }
+      .choice:hover:not(:disabled) {
+        border-color: var(--accent);
+        background: #f8f9ff;
+      }
+      .choice .n {
+        font-weight: 750;
+        color: var(--accent);
+        min-width: 18px;
+      }
+      .choice.correct {
+        border-color: var(--good);
+        background: #effaf3;
+      }
+      .choice.wrong {
+        border-color: var(--bad);
+        background: #fff2f2;
+      }
+      .feedback {
+        margin-top: 16px;
+        padding: 14px;
+        border-radius: 12px;
+        background: #f4f6fb;
+        display: none;
+      }
+      .feedback.show {
+        display: block;
+      }
+      .feedback.good {
+        border-left: 4px solid var(--good);
+      }
+      .feedback.bad {
+        border-left: 4px solid var(--bad);
+      }
+      .feedback strong {
+        display: block;
+        margin-bottom: 4px;
+      }
+      .meanings {
+        display: grid;
+        gap: 9px;
+        margin-top: 12px;
+      }
+      .meaning {
+        padding: 10px;
+        border-radius: 10px;
+        background: #f4f6fb;
+        border: 1px solid var(--line);
+      }
+      .meaning.correct-meaning {
+        background: #effaf3;
+        border-color: var(--good);
+      }
+      .actions {
+        display: flex;
+        gap: 10px;
+        justify-content: space-between;
+        margin-top: 18px;
+        flex-wrap: wrap;
+      }
+      .hidden {
+        display: none !important;
+      }
+      .result {
+        text-align: center;
+        padding: 26px;
+      }
+      .score {
+        font-size: 48px;
+        font-weight: 800;
+        color: var(--accent);
+      }
+      .small {
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .footer {
+        color: var(--muted);
+        font-size: 13px;
+        margin: 18px 4px;
+      }
+      .question-images {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        margin: 16px 0;
+      }
+
+      .question-images img {
+        max-width: 100%;
+        height: auto;
+        object-fit: contain;
+      }
+      @media (max-width: 600px) {
+        .wrap {
+          padding: 12px 10px 40px;
+        }
+        .hero {
+          padding: 19px;
+        }
+        .toolbar {
+          padding: 14px;
+        }
+        .stats {
+          width: 100%;
+          margin: 0;
+        }
+        .question {
+          padding: 15px;
+        }
+        .question h2 {
+          font-size: 18px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <header class="hero">
+        <h1>JLPT Practice Quiz</h1>
+        <p>Chọn kỳ thi/năm, phần thi và thứ tự câu hỏi để bắt đầu luyện tập.</p>
+      </header>
+      <section class="toolbar">
+        <label>Đề thi<br /><select id="examSelect"></select></label>
+        <label
+          >Phần thi<br /><select id="filter">
+            <option value="all">Tất cả câu hỏi</option>
+            <option value="文字・語彙">文字・語彙 (Kanji & Từ vựng)</option>
+            <option value="文法">文法 (Ngữ pháp)</option>
+            <option value="読解">読解 (Đọc hiểu)</option>
+          </select></label
+        >
+        <label
+          >Thứ tự<br /><select id="order">
+            <option value="normal">Theo thứ tự PDF</option>
+            <option value="random">Ngẫu nhiên</option>
+          </select></label
+        >
+        <button id="start" class="primary">Bắt đầu / Làm lại</button>
+        <div class="stats" id="stats">0 / 0 câu đã trả lời</div>
+        <div class="progress" style="width: 100%">
+          <div class="bar" id="bar"></div>
+        </div>
+      </section>
+      <section id="quiz" class="question">
+        <div class="meta"><span class="tag">Sẵn sàng</span></div>
+        <h2>Chọn đề thi và nhấn “Bắt đầu” để làm bài.</h2>
+        <p class="small">
+          Sau khi chọn đáp án, Quiz hiển thị giải thích và nghĩa tiếng Việt của
+          các lựa chọn.
+        </p>
+      </section>
+      <section id="result" class="panel result hidden"></section>
+      <p class="footer">
+        Hiện có đề N2 tháng 7/2026. Để thêm đề, tạo file JS theo mẫu trong
+        README và thêm thẻ script của file đó vào HTML.
+      </p>
+    </main>
+    <!-- Moi de thi la mot file JS rieng. Them script src moi khi co de moi. -->
+    <script src="questions-n2-t7-2026.js"></script>
+    <script src="questions-n2-t7-2025.js"></script>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const exams = window.JLPT_EXAMS || [];
+      let currentExam = null,
+        questions = [],
+        pool = [],
+        idx = 0,
+        answers = {};
+      function initExamSelect() {
+        const select = $("examSelect");
+        if (!exams.length) {
+          select.innerHTML = "<option>Không tìm thấy dữ liệu đề thi</option>";
+          $("start").disabled = true;
+          return;
+        }
+        select.innerHTML = exams
+          .map(
+            (exam, i) =>
+              `<option value="${i}">${exam.title || exam.id || `Đề thi ${i + 1}`}</option>`,
+          )
+          .join("");
+        select.addEventListener("change", () => {
+          resetView();
+          loadSelectedExam();
+        });
+        loadSelectedExam();
+      }
+      function loadSelectedExam() {
+        currentExam = exams[Number($("examSelect").value)] || exams[0];
+        questions = currentExam.questions || [];
+        document.title =
+          (currentExam.title || "JLPT Quiz") + " – Practice Quiz";
+        resetView();
+      }
+      function resetView() {
+        pool = [];
+        idx = 0;
+        answers = {};
+        $("result").classList.add("hidden");
+        $("quiz").classList.remove("hidden");
+        $("quiz").innerHTML =
+          '<div class="meta"><span class="tag">' +
+          (currentExam?.title || "Sẵn sàng") +
+          '</span></div><h2>Chọn phần thi và nhấn “Bắt đầu” để làm bài.</h2><p class="small">Đề này có ' +
+          questions.length +
+          " câu hỏi.</p>";
+        $("stats").textContent = "0 / 0 câu đã trả lời";
+        $("bar").style.width = "0%";
+      }
+      function shuffle(a) {
+        let x = [...a];
+        for (let i = x.length - 1; i > 0; i--) {
+          let j = Math.floor(Math.random() * (i + 1));
+          [x[i], x[j]] = [x[j], x[i]];
+        }
+        return x;
+      }
+      function start() {
+        let cat = $("filter").value;
+        pool = questions
+          .map((q, i) => ({ ...q, id: i }))
+          .filter((q) => cat === "all" || q.c === cat);
+        if ($("order").value === "random") pool = shuffle(pool);
+        idx = 0;
+        answers = {};
+        $("result").classList.add("hidden");
+        $("quiz").classList.remove("hidden");
+        render();
+      }
+      function render() {
+        if (!pool.length) {
+          $("quiz").innerHTML = "<h2>Không có câu hỏi trong phần thi này.</h2>";
+          return;
+        }
+        let q = pool[idx],
+          chosen = answers[q.id];
+        $("stats").textContent =
+          `${Object.keys(answers).length} / ${pool.length} câu đã trả lời`;
+        $("bar").style.width =
+          (Object.keys(answers).length / pool.length) * 100 + "%";
+
+        let html = `<div class="meta">
+          <span class="tag">${q.c}</span><span>Trang PDF: ${q.p}</span
+          ><span class="num">Câu ${idx + 1} / ${pool.length}</span>
+        </div>
+        `;
+        if (q.images?.length) {
+          html += `
+          <section class="passage">
+            <div class="question-images">
+              ${q.images
+                .map(
+                  (src) => `
+                <img src="${src}" alt="${q.imageAlt || ""}">
+              `,
+                )
+                .join("")}
+            </div>
+          </section>
+          `;
+        }
+        if (q.passage) {
+          html += `
+          <section class="passage">
+            <div class="passage-title">📖 Bài đọc – ${q.passageId || "Trang " + q.p}</div>
+            ${q.passage}
+          </section>
+          `;
+        }
+        html += `
+        <h2>${q.q}</h2>
+        <div class="choices">
+        `;
+        q.o.forEach((v, i) => {
+          let cl = "choice";
+          if (chosen !== undefined && i === q.a) cl += " correct";
+          else if (chosen === i && chosen !== q.a) cl += " wrong";
+          html += `<button class="${cl}" data-i="${i}" ${chosen !== undefined ? "disabled" : ""}><span class="n">${i + 1}.</span><span>${v}</span></button>`;
+        });
+        html += "</div>";
+        if (chosen !== undefined) {
+          let ok = chosen === q.a;
+          html += `<div class="feedback show ${ok ? "good" : "bad"}"><strong>${ok ? "Chính xác!" : "Chưa chính xác."} Đáp án: ${q.a + 1}. ${q.o[q.a]}</strong><div>${q.e || ""}</div><hr><b>📚 Nghĩa các lựa chọn</b><div class="meanings">${q.o.map((v, i) => `<div class="meaning ${i === q.a ? "correct-meaning" : ""}"><b>${i + 1}. ${v} ${i === q.a ? "✓ Đáp án đúng" : ""}</b><div>${q.om?.[i] || "Chưa có nghĩa tiếng Việt."}</div></div>`).join("")}</div></div>`;
+        }
+        html += `<div class="actions"><button id="prev" ${idx === 0 ? "disabled" : ""}>← Câu trước</button><button id="next" class="primary" ${chosen === undefined ? "disabled" : ""}>${idx === pool.length - 1 ? "Xem kết quả" : "Câu tiếp theo →"}</button></div>`;
+        $("quiz").innerHTML = html;
+        $("quiz")
+          .querySelectorAll(".choice")
+          .forEach((b) =>
+            b.addEventListener("click", () => {
+              answers[q.id] = Number(b.dataset.i);
+              render();
+            }),
+          );
+        $("prev").addEventListener("click", () => {
+          idx--;
+          render();
+        });
+        $("next").addEventListener("click", () => {
+          if (idx < pool.length - 1) {
+            idx++;
+            render();
+          } else finish();
+        });
+      }
+      function finish() {
+        let correct = pool.filter((q) => answers[q.id] === q.a).length,
+          wrong = pool.filter((q) => answers[q.id] !== q.a);
+        $("quiz").classList.add("hidden");
+        $("result").classList.remove("hidden");
+        $("bar").style.width = "100%";
+        $("stats").textContent =
+          `${pool.length} / ${pool.length} câu đã trả lời`;
+        $("result").innerHTML =
+          `<div class="meta" style="justify-content:center"><span class="tag">${currentExam.title || "Hoàn thành"}</span></div><div class="score">${correct}/${pool.length}</div><h2>${Math.round((correct / pool.length) * 100)}% chính xác</h2><p>${wrong.length ? `Bạn có ${wrong.length} câu cần ôn lại.` : "Xuất sắc! Bạn đã trả lời đúng tất cả."}</p>${wrong.length ? '<div style="text-align:left;margin:20px auto;max-width:650px"><h3>Câu cần xem lại</h3>' + wrong.map((q) => `<p><b>${q.c} – Trang ${q.p}:</b> ${q.q}<br><span style="color:var(--good)">Đáp án: ${q.a + 1}. ${q.o[q.a]}</span></p>`).join("") + "</div>" : ""}<button class="primary" id="retry">Làm lại bài này</button> <button id="wrongOnly" ${wrong.length ? "" : "disabled"}>Ôn câu sai</button>`;
+        $("retry").onclick = start;
+        $("wrongOnly").onclick = () => {
+          pool = wrong;
+          idx = 0;
+          answers = {};
+          $("result").classList.add("hidden");
+          $("quiz").classList.remove("hidden");
+          render();
+        };
+      }
+      $("start").addEventListener("click", start);
+      initExamSelect();
+    </script>
+  </body>
+</html>
